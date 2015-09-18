@@ -1,55 +1,48 @@
 #include <iostream>
 #include "Dictionary.h"
 #include <cstdlib>
+#include <stdexcept>
 
 using namespace std;
 using namespace model;
 
-bool testRI(){
+void testRI(){
 
 	unsigned int num_words = 1;
 	int d = 100;
 	int epsilon = 2;
 	int k = 2;
 
-	short tmp_idx[1] = { 123 };
+	short** tmp_idx = new short*[1];
+	tmp_idx[0] = new short[2];
+	tmp_idx[0][0] = 123;
+	tmp_idx[0][1] = 456;
 
-	Dictionary dict(num_words, d, epsilon, k);
+	int*** tmp_ctx = new int**[num_words];
+	for (unsigned int i = 0; i < num_words; ++i){
+		tmp_ctx[i] = new int*[2*k];
+		for (short j = 0; j < 2*k; ++j){
+			tmp_ctx[i][j] = new int[d];
+			for (short n = 0; n < d; ++n)
+				tmp_ctx[i][j][n] = 0;
+		}
+	}
+
+	Dictionary dict(num_words, d, epsilon, k, tmp_idx, tmp_ctx);
 
 	IndexVector i1 = dict.getIndexVector("hej");
-	//IndexVector i2 = dict.getIndexVector("tja");
 
-	// Print it!
-	for (unsigned int i = 0; i < epsilon+10000; ++i)
-	    cout << i1.getSource()[i] << " ";
-	//cout << i2 << endl;
+	if(i1.getSource()[0] != 123 || i1.getSource()[1] != 456)
+		throw runtime_error("RItest failed!");
 }
-#pragma optimize( "", off )
 
 int main()
 {
 
 	//cout << "Hello" << endl;
 
-	//testRI();
-	int n = 10000000;
-	short test_arr[n];
+	testRI();
 
-	cout << test_arr[n] << endl;
-
-	//for (unsigned int i = 0; i < 1000; ++i)
-	/*unsigned int i = 0;
-	while(true){
-		try{
-			test_arr[i++];
-		}catch(...){
-			cout << endl << "error" << endl;
-			break;
-		}
-	}*/
-
-	//delete[] test_arr;
-
-	//cout << "Hello" << endl;
+	cout << "Hello" << endl;
 	return 0;
 }

@@ -40,7 +40,7 @@ Dictionary::Dictionary(unsigned int num_words, int d, int epsilon, int k){
 	}
 
 	// Allocate and initialize context matrices
-	/*contexts = new int**[num_words];
+	contexts = new int**[num_words];
 	for (unsigned int i = 0; i < num_words; ++i){
 		contexts[i] = new int*[2*k];
 		for (short j = 0; j < 2*k; ++j){
@@ -48,7 +48,7 @@ Dictionary::Dictionary(unsigned int num_words, int d, int epsilon, int k){
 			for (short n = 0; n < d; ++n)
 				contexts[i][j][n] = 0;
 		}
-	}*/
+	}
 }
 
 Dictionary::Dictionary(unsigned int num_words, int d, int epsilon, int k, short** idx_vectors, int*** ctxs) {
@@ -73,12 +73,12 @@ Dictionary::~Dictionary() {
 	delete[] index_vectors;
 
 	// Delete contexts
-	/*for (unsigned int i = 0; i < num_words; ++i){
+	for (unsigned int i = 0; i < num_words; ++i){
 		for (short j = 0; j < 2*k; ++j)
 			delete[] contexts[i][j];
 		delete[] contexts[i];
 	}
-	delete[] contexts;*/
+	delete[] contexts;
 }
 
 /*
