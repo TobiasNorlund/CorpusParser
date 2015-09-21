@@ -14,6 +14,8 @@ class Context {
 public:
 	Context(int** source);
 	virtual ~Context();
+private:
+	int** source;
 };
 
 } /* namespace model */

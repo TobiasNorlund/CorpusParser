@@ -105,6 +105,7 @@ Context Dictionary::getContext(string word){
 			throw runtime_error("Maximum number of words exceeded");
 		index_map[word] = next_word_idx++;
 	}
+	return Context(contexts[index_map[word]]);
 }
 
 }

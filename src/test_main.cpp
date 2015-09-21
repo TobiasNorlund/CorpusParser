@@ -2,6 +2,8 @@
 #include "Dictionary.h"
 #include <cstdlib>
 #include <stdexcept>
+#include "GpuParser.h"
+#include "DummyCorpus.h"
 
 using namespace std;
 using namespace model;
@@ -39,10 +41,28 @@ void testRI(){
 int main()
 {
 
-	//cout << "Hello" << endl;
+	cout << sizeof(short) << endl;
 
-	testRI();
+	short* arr = new short[10000000];
 
+	//testRI();
+
+	// Create parser
+	/*GpuParser parser;
+	DummyCorpus corpus;
+	int k = 1;
+	int d = 5;
+	int epsilon = 1;
+	unsigned long max_cpu_mem = 10000000;
+	unsigned long max_gpu_mem = 10000000;
+	unsigned long max_shared_mem = 1000;
+
+	parser.parse(corpus, k, d, epsilon, max_cpu_mem, max_gpu_mem, max_shared_mem);
+
+	Dictionary* result = parser.getDictionary();
+
+	delete result;
+*/
 	cout << "Hello" << endl;
 	return 0;
 }

@@ -11,8 +11,7 @@
 namespace model {
 
 Context::Context(int** source) {
-	// TODO Auto-generated constructor stub
-
+	this->source = source;
 }
 
 Context::~Context() {
