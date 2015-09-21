@@ -12,10 +12,10 @@ namespace model {
 
 class Context {
 public:
-	Context(int** source);
+	Context(int* source);
 	virtual ~Context();
 private:
-	int** source;
+	int* source;
 };
 
 } /* namespace model */

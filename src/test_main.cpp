@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Dictionary.h"
 #include <cstdlib>
+#include <cstring>
 #include <stdexcept>
 #include "GpuParser.h"
 #include "DummyCorpus.h"
@@ -15,20 +16,12 @@ void testRI(){
 	int epsilon = 2;
 	int k = 2;
 
-	short** tmp_idx = new short*[1];
-	tmp_idx[0] = new short[2];
-	tmp_idx[0][0] = 123;
-	tmp_idx[0][1] = 456;
+	short* tmp_idx = (short*) malloc(num_words * epsilon * sizeof(short));
+	tmp_idx[0] = 123;
+	tmp_idx[1] = 456;
 
-	int*** tmp_ctx = new int**[num_words];
-	for (unsigned int i = 0; i < num_words; ++i){
-		tmp_ctx[i] = new int*[2*k];
-		for (short j = 0; j < 2*k; ++j){
-			tmp_ctx[i][j] = new int[d];
-			for (short n = 0; n < d; ++n)
-				tmp_ctx[i][j][n] = 0;
-		}
-	}
+	int* tmp_ctx = (int*) malloc(num_words*(2*k)*d * sizeof(int));
+	memset(tmp_ctx, 0, num_words*(2*k)*d * sizeof(int)); // Init to 0
 
 	Dictionary dict(num_words, d, epsilon, k, tmp_idx, tmp_ctx);
 
@@ -41,11 +34,7 @@ void testRI(){
 int main()
 {
 
-	cout << sizeof(short) << endl;
-
-	short* arr = new short[10000000];
-
-	//testRI();
+	testRI();
 
 	// Create parser
 	/*GpuParser parser;
@@ -53,7 +42,7 @@ int main()
 	int k = 1;
 	int d = 5;
 	int epsilon = 1;
-	unsigned long max_cpu_mem = 10000000;
+	unsigned long max_cpu_mem = 100000000;
 	unsigned long max_gpu_mem = 10000000;
 	unsigned long max_shared_mem = 1000;
 
@@ -61,8 +50,8 @@ int main()
 
 	Dictionary* result = parser.getDictionary();
 
-	delete result;
-*/
+	delete result;*/
+
 	cout << "Hello" << endl;
 	return 0;
 }

@@ -10,7 +10,7 @@
 
 namespace model {
 
-Context::Context(int** source) {
+Context::Context(int* source) {
 	this->source = source;
 }
 

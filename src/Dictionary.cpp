@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <string>
 #include <stdexcept>
+#include <cstring>
 
 #include <iostream>
 
@@ -32,26 +33,18 @@ Dictionary::Dictionary(unsigned int num_words, int d, int epsilon, int k){
 
 	// Allocate and initialize index vectors
 	srand(time(0));
-	index_vectors = new short*[num_words];
-	for (unsigned int i = 0; i < num_words; ++i){
-		index_vectors[i] = new short[epsilon];
-		for (int j = 0; j < epsilon; ++j)
-			index_vectors[i][j] = rand();
+	index_vectors = (short*) malloc(num_words * epsilon * sizeof(short));
+	for (unsigned int i = 0; i < num_words * epsilon; ++i){
+		index_vectors[i] = rand();
 	}
 
 	// Allocate and initialize context matrices
-	contexts = new int**[num_words];
-	for (unsigned int i = 0; i < num_words; ++i){
-		contexts[i] = new int*[2*k];
-		for (short j = 0; j < 2*k; ++j){
-			contexts[i][j] = new int[d];
-			for (short n = 0; n < d; ++n)
-				contexts[i][j][n] = 0;
-		}
-	}
+	contexts = (int*) malloc(num_words*(2*k)*d * sizeof(int));
+	memset(contexts, 0, num_words*(2*k)*d * sizeof(int)); // Init to 0
+
 }
 
-Dictionary::Dictionary(unsigned int num_words, int d, int epsilon, int k, short** idx_vectors, int*** ctxs) {
+Dictionary::Dictionary(unsigned int num_words, int d, int epsilon, int k, short* idx_vectors, int* ctxs) {
 
 	this->num_words = num_words;
 	this->d = d;
@@ -68,17 +61,10 @@ Dictionary::Dictionary(unsigned int num_words, int d, int epsilon, int k, short*
 Dictionary::~Dictionary() {
 
 	// Delete index vectors
-	for (unsigned int i = 0; i < num_words; ++i)
-		delete[] index_vectors[i];
-	delete[] index_vectors;
+	free(index_vectors);
 
 	// Delete contexts
-	for (unsigned int i = 0; i < num_words; ++i){
-		for (short j = 0; j < 2*k; ++j)
-			delete[] contexts[i][j];
-		delete[] contexts[i];
-	}
-	delete[] contexts;
+	free(contexts);
 }
 
 /*
@@ -92,7 +78,7 @@ IndexVector Dictionary::getIndexVector(string word){
 			throw runtime_error("Maximum number of words exceeded");
 		index_map[word] = next_word_idx++;
 	}
-	return IndexVector(index_vectors[index_map[word]]);
+	return IndexVector((short*)(index_vectors + index_map[word]*epsilon * sizeof(short)));
 }
 
 /**
@@ -105,7 +91,7 @@ Context Dictionary::getContext(string word){
 			throw runtime_error("Maximum number of words exceeded");
 		index_map[word] = next_word_idx++;
 	}
-	return Context(contexts[index_map[word]]);
+	return Context((int*)(contexts + index_map[word]*(2*k)*d * sizeof(int)));
 }
 
 }

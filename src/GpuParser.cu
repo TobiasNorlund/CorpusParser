@@ -30,8 +30,8 @@ void GpuParser::parse(Corpus& corpus, int k, int d, int epsilon, unsigned long m
 	int win_size = 2*k+1;
 
 	// Calculate how to distribute this job
-	unsigned int max_words = max_cpu_mem / (2*epsilon + 4*d * k*2);
-	unsigned int batch_size = max_gpu_mem / (2*epsilon + 2*d * k*2);
+	unsigned int max_words = max_cpu_mem / (sizeof(short)*epsilon + sizeof(int)*d * k*2);
+	unsigned int batch_size = max_gpu_mem / (sizeof(short)*epsilon + sizeof(short)*d * k*2);
 
 	if(!dictSpecified)
 		this->dictionary = new Dictionary(max_words, d, epsilon, k);
