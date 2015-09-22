@@ -23,6 +23,7 @@ public:
 private:
 	bool dictSpecified = false;
 	model::Dictionary* dictionary;
+
 };
 
 #endif /* CPUPARSER_H_ */

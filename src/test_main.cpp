@@ -52,12 +52,12 @@ void testOneBCorpus(){
 int main()
 {
 
-	//testRI();
+	testRI();
 	//testOneBCorpus();
 
 	// Create parser
 	CpuParser parser;
-	OneBCorpus corpus("/home/tobiasnorlund/Code/Exjobb/corpus/1-billion-word-language-modeling-benchmark-r13output/training-monolingual.tokenized.shuffled/news.en-00001-of-00100");
+	OneBCorpus corpus("/home/tobiasnorlund/Code/Exjobb/corpus/1-billion-word-language-modeling-benchmark-r13output/training-monolingual.tokenized.shuffled/");
 	int k = 1;
 	int d = 100;
 	int epsilon = 1;
@@ -67,7 +67,13 @@ int main()
 
 	parser.parse(corpus, k, d, epsilon, max_cpu_mem);
 
+	cout << "Parse complete!" << endl;
+	cout << "Saving ...";
+
 	Dictionary* result = parser.getDictionary();
+	result->save("/home/tobiasnorlund/Code/Dump/", corpus.toString());
+
+	cout << "\rDone!           " << endl;
 
 	return 0;
 }

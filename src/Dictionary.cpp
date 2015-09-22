@@ -11,7 +11,7 @@
 #include <string>
 #include <stdexcept>
 #include <cstring>
-
+#include <fstream>
 #include <iostream>
 
 using namespace std;
@@ -100,5 +100,36 @@ Context Dictionary::getContext(string word){
 	newWord(word);
 	return Context((int*)(contexts + index_map[word]*(2*k)*d * sizeof(int)), d);
 }
+
+/*
+ * Creates three files:
+ *
+ *  - <filename>.map			= The words
+ *  - <filename>.context.bin
+ *  - <filename>.index.bin
+ *
+ *  which is a dump of the contexts and index vectors respectively
+ */
+void Dictionary::save(string dir, string name){
+
+	ofstream fm(dir + name + "-" + to_string(next_word_idx) + "-" + to_string(d) + ".map", ofstream::out);
+	ofstream fc(dir + name + "-" + to_string(next_word_idx) + "-" + to_string(d) + ".context.bin", ios::out | ios::binary);
+	ofstream fi(dir + name + "-" + to_string(next_word_idx) + "-" + to_string(d) + ".index.bin", ios::out | ios::binary);
+
+	// Write map file
+	for(auto it : index_map)
+		fm << it.first << " ";
+	fm.close();
+
+	// Write index dump file
+	fi.write((char*)index_vectors, next_word_idx * epsilon * sizeof(unsigned short));
+	fi.close();
+
+	// Write context dump file
+	fc.write((char*)contexts, next_word_idx * (2*k)*d * sizeof(int));
+	fc.close();
+
+}
+
 
 }

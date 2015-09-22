@@ -9,8 +9,10 @@
 #include "Corpus.h"
 #include "Dictionary.h"
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <string>
+#include <math.h>
 
 using namespace model;
 using namespace std;
@@ -81,13 +83,16 @@ void CpuParser::parse(Corpus& corpus, int k, int d, int epsilon, unsigned long m
 		processed_words_count += 1;
 
 		if(processed_words_count % 10000 == 0){
-			cout << "\rWords processed: " << processed_words_count << " | Total words: " << dictionary->getNumWords() << " (" << dictionary->getNumWords() * 100 /max_words << "%)"<< flush;
+			cout << "\rWords processed: " << processed_words_count <<
+					" | Total words: " << dictionary->getNumWords() << " (" << dictionary->getNumWords() * 100 /max_words << "%)" <<
+					" | Progress: " << corpus.getProgress() << "%" << flush;
 		}
 
 	}
 
+	cout << "\rWords processed: " << processed_words_count <<
+						" | Total words: " << dictionary->getNumWords() << " (" << dictionary->getNumWords() * 100 /max_words << "%)" <<
+						" | Progress: " << int(corpus.getProgress()*100) << "%" << endl;
 	delete[] win_idx;
-
-	cout << endl << "Done!" << endl;
 
 }

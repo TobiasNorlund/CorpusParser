@@ -16,22 +16,24 @@ namespace model {
 
 class OneBCorpus: public model::Corpus {
 public:
-	OneBCorpus(std::string filepath);
+	OneBCorpus(std::string dir);
 	virtual ~OneBCorpus();
 
-	std::string nextWord();
 	float getProgress();
-
-	bool hasMore();
 	bool operator>>(std::string& val);
 
 	std::string toString();
 
 private:
-	std::ifstream file;
+	std::string dir;
+	int current_file;
+	std::ifstream* file;
 	std::string next_word;
 	unsigned long total_size;
 	unsigned long total_read;
+
+	void initFile(int ind);
+	void closeFile();
 };
 
 } /* namespace model */
