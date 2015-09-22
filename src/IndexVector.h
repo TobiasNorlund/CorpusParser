@@ -8,6 +8,8 @@
 #ifndef INDEXVECTOR_H_
 #define INDEXVECTOR_H_
 
+#include <string>
+
 namespace model {
 
 class IndexVector {
@@ -19,6 +21,7 @@ public:
 	short  getEpsilon();
 	char   getValueAt(short ind);
 	unsigned short getIndexAt(short ind);
+	std::string toString();
 private:
 	unsigned short* source;
 	short epsilon;

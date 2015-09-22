@@ -89,7 +89,7 @@ void Dictionary::newWord(string word){
 IndexVector Dictionary::getIndexVector(string word){
 	// Assign a new word if unseen
 	newWord(word);
-	return IndexVector((unsigned short*)(index_vectors + index_map[word]*epsilon * sizeof(unsigned short)), epsilon);
+	return IndexVector((unsigned short*)(index_vectors + index_map[word]*epsilon), epsilon); // * sizeof(unsigned short)
 }
 
 /**
@@ -98,7 +98,7 @@ IndexVector Dictionary::getIndexVector(string word){
 Context Dictionary::getContext(string word){
 	// Assign a new word if unseen
 	newWord(word);
-	return Context((int*)(contexts + index_map[word]*(2*k)*d * sizeof(int)), d);
+	return Context((int*)(contexts + index_map[word]*(2*k)*d), d); // * sizeof(int)
 }
 
 /*

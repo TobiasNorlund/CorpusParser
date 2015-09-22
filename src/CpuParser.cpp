@@ -82,7 +82,7 @@ void CpuParser::parse(Corpus& corpus, int k, int d, int epsilon, unsigned long m
 		wi = (wi + 1) % win_size;
 		processed_words_count += 1;
 
-		if(processed_words_count % 10000 == 0){
+		if(processed_words_count % 40000 == 0){
 			cout << "\rWords processed: " << processed_words_count <<
 					" | Total words: " << dictionary->getNumWords() << " (" << dictionary->getNumWords() * 100 /max_words << "%)" <<
 					" | Progress: " << corpus.getProgress() << "%" << flush;
