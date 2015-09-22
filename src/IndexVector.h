@@ -12,12 +12,16 @@ namespace model {
 
 class IndexVector {
 public:
-	IndexVector(short* source) : _source{source} {};
+	IndexVector(unsigned short* source, short epsilon) : source{source}, epsilon{epsilon} {};
 	virtual ~IndexVector();
 
-	short* getSource();
+	unsigned short* getSource();
+	short  getEpsilon();
+	char   getValueAt(short ind);
+	unsigned short getIndexAt(short ind);
 private:
-	short* _source;
+	unsigned short* source;
+	short epsilon;
 };
 
 } /* namespace model */

@@ -17,13 +17,17 @@ namespace model {
 class Dictionary {
 public:
 	Dictionary(unsigned int num_words, int d, int epsilon, int k);
-	Dictionary(unsigned int num_words, int d, int epsilon, int k, short* index_vectors, int* contexts);
+	Dictionary(unsigned int num_words, int d, int epsilon, int k, unsigned short* index_vectors, int* contexts);
 	virtual ~Dictionary();
+
+	void newWord(std::string word);
 
 	IndexVector getIndexVector(std::string word);
 	Context	getContext(std::string word);
 
-	short* index_vectors;
+	unsigned int getNumWords();
+
+	unsigned short* index_vectors;
 	int* contexts;
 
 private:

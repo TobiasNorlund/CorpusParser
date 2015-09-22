@@ -17,7 +17,8 @@ GpuParser::GpuParser(Dictionary* dictionary){
 }
 
 GpuParser::~GpuParser(){
-
+	if(!dictSpecified)
+		delete dictionary;
 }
 
 Dictionary* GpuParser::getDictionary(){

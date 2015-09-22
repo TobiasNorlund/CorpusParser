@@ -17,8 +17,10 @@ public:
 	Corpus();
 	virtual ~Corpus();
 
-	virtual std::string nextWord() =0;
 	virtual float getProgress() =0;
+	virtual bool operator>>(std::string& val) =0;
+
+	virtual std::string toString() =0;
 };
 
 } /* namespace model */

@@ -21,13 +21,23 @@ DummyCorpus::~DummyCorpus() {
 	// TODO Auto-generated destructor stub
 }
 
-string DummyCorpus::nextWord(){
-	string words[3] = {"the", "cat", "sat"};
-	return words[idx++];
-}
-
 float DummyCorpus::getProgress(){
 	return idx/3.0;
+}
+
+
+bool DummyCorpus::operator>>(string& val){
+	string words[3] = {"the", "cat", "sat"};
+	if(idx < 3){
+		val = words[idx++];
+		return true;
+	}else{
+		return false;
+	}
+}
+
+string DummyCorpus::toString(){
+	return "DummyCorpus";
 }
 
 } /* namespace model */

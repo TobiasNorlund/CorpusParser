@@ -33,9 +33,9 @@ Dictionary::Dictionary(unsigned int num_words, int d, int epsilon, int k){
 
 	// Allocate and initialize index vectors
 	srand(time(0));
-	index_vectors = (short*) malloc(num_words * epsilon * sizeof(short));
+	index_vectors = (unsigned short*) malloc(num_words * epsilon * sizeof(unsigned short));
 	for (unsigned int i = 0; i < num_words * epsilon; ++i){
-		index_vectors[i] = rand();
+		index_vectors[i] = rand() % (d << 1);
 	}
 
 	// Allocate and initialize context matrices
@@ -44,7 +44,7 @@ Dictionary::Dictionary(unsigned int num_words, int d, int epsilon, int k){
 
 }
 
-Dictionary::Dictionary(unsigned int num_words, int d, int epsilon, int k, short* idx_vectors, int* ctxs) {
+Dictionary::Dictionary(unsigned int num_words, int d, int epsilon, int k, unsigned short* idx_vectors, int* ctxs) {
 
 	this->num_words = num_words;
 	this->d = d;
@@ -67,31 +67,38 @@ Dictionary::~Dictionary() {
 	free(contexts);
 }
 
-/*
- * Returns the word's corresponding index vector.
- */
-IndexVector Dictionary::getIndexVector(string word){
+unsigned int Dictionary::getNumWords(){
+	return next_word_idx;
+}
 
+/*
+ * Assigns a new index vector and context if the word is unseen
+ */
+void Dictionary::newWord(string word){
 	if(index_map.find(word) == index_map.end()){
 		// Assign new word if not buffer full
 		if(next_word_idx == num_words)
 			throw runtime_error("Maximum number of words exceeded");
 		index_map[word] = next_word_idx++;
 	}
-	return IndexVector((short*)(index_vectors + index_map[word]*epsilon * sizeof(short)));
+}
+
+/*
+ * Returns the word's corresponding index vector.
+ */
+IndexVector Dictionary::getIndexVector(string word){
+	// Assign a new word if unseen
+	newWord(word);
+	return IndexVector((unsigned short*)(index_vectors + index_map[word]*epsilon * sizeof(unsigned short)), epsilon);
 }
 
 /**
  * Returns the word's corresponding context.
  */
 Context Dictionary::getContext(string word){
-	if(index_map.find(word) == index_map.end()){
-		// Assign new word if buffer not full
-		if(next_word_idx == num_words)
-			throw runtime_error("Maximum number of words exceeded");
-		index_map[word] = next_word_idx++;
-	}
-	return Context((int*)(contexts + index_map[word]*(2*k)*d * sizeof(int)));
+	// Assign a new word if unseen
+	newWord(word);
+	return Context((int*)(contexts + index_map[word]*(2*k)*d * sizeof(int)), d);
 }
 
 }

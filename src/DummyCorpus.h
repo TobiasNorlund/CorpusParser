@@ -17,9 +17,10 @@ public:
 	DummyCorpus();
 	virtual ~DummyCorpus();
 
-	std::string nextWord();
 	float getProgress();
+	bool operator>>(std::string& val);
 
+	std::string toString();
 private:
 	int idx = 0;
 };
