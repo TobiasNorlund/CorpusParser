@@ -6,6 +6,7 @@
 #include "CpuParser.h"
 #include "DummyCorpus.h"
 #include "OneBCorpus.h"
+#include <algorithm>
 
 using namespace std;
 using namespace model;
@@ -38,8 +39,13 @@ void testRI(){
 			i1.getIndexAt(1) != 228 ||
 			c1.get(0, 228) != -1 ||
 			c1.get(1, 61) != 1
-			)
+			){
+		delete tmp_idx;
+		delete tmp_ctx;
+
 		throw runtime_error("RItest failed!");
+	}
+
 }
 
 void testOneBCorpus(){
@@ -49,29 +55,50 @@ void testOneBCorpus(){
 		cout << word << endl;
 }
 
-int main()
+char* getCmdOption(char ** begin, char ** end, const std::string & option)
 {
+    char ** itr = find(begin, end, option);
+    if (itr != end && ++itr != end)
+    {
+        return *itr;
+    }
+    return 0;
+}
 
+bool cmdOptionExists(char** begin, char** end, const std::string& option)
+{
+    return find(begin, end, option) != end;
+}
+
+int main(int argc, char** argv)
+{
 	testRI();
 	//testOneBCorpus();
 
+	// Parse command line arguments
+	Corpus* corpus;
+	if (getCmdOption(argv,argv+argc, (string)"-corpus") == (string)"OneBCorpus")
+		corpus = new OneBCorpus("/home/tobiasnorlund/Code/Exjobb/corpus/1-billion-word-language-modeling-benchmark-r13output/training-monolingual.tokenized.shuffled/");
+	else
+		throw runtime_error("A valid corpus must be given.");
+
+	int k = (cmdOptionExists(argv,argv+argc,"-k")) ? atoi(getCmdOption(argv,argv+argc,"-k")) : 2 ;
+	int d = (cmdOptionExists(argv,argv+argc,"-d")) ? atoi(getCmdOption(argv,argv+argc,"-d")) : 2000;
+	int epsilon = (cmdOptionExists(argv,argv+argc,"-e")) ? atoi(getCmdOption(argv,argv+argc,"-e")) : 10;
+	unsigned long max_cpu_mem = (cmdOptionExists(argv,argv+argc,"-mem")) ? atol(getCmdOption(argv,argv+argc,"-mem")) : 1000000000L;
+
 	// Create parser
 	CpuParser parser;
-	OneBCorpus corpus("/home/tobiasnorlund/Code/Exjobb/corpus/1-billion-word-language-modeling-benchmark-r13output/training-monolingual.tokenized.shuffled/");
-	int k = 1;
-	int d = 100;
-	int epsilon = 1;
-	unsigned long max_cpu_mem = 1000000000;
-	unsigned long max_gpu_mem = 10000000;
-	unsigned long max_shared_mem = 1000;
 
-	parser.parse(corpus, k, d, epsilon, max_cpu_mem);
+	parser.parse(*corpus, k, d, epsilon, max_cpu_mem);
 
 	cout << "Parse complete!" << endl;
 	cout << "Saving ...";
 
 	Dictionary* result = parser.getDictionary();
-	result->save("/home/tobiasnorlund/Code/Dump/", corpus.toString());
+	result->save("/home/tobiasnorlund/Code/Dump/", corpus->toString());
+
+	delete corpus;
 
 	cout << "\rDone!           " << endl;
 

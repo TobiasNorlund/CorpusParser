@@ -47,8 +47,13 @@ void CpuParser::parse(Corpus& corpus, int k, int d, int epsilon, unsigned long m
 		this->dictionary = new Dictionary(max_words, d, epsilon, k);
 
 	// Begin parse !
+	cout << endl;
 	cout << "Begin parsing of corpus: " << corpus.toString() << endl << endl;
 	cout << " Maximum number of unique words allowed: " << max_words << endl;
+	cout << " Maximum number of memory allowed: " << max_cpu_mem << " bytes" << endl;
+	cout << " Window size: " << k << " + " << k << endl;
+	cout << " Word embedding dimensionality: " << d << endl;
+	cout << " Non-zero elements in index vectors: " << epsilon << endl;
 	cout << endl;
 
 	// Read in first window
@@ -85,14 +90,14 @@ void CpuParser::parse(Corpus& corpus, int k, int d, int epsilon, unsigned long m
 		if(processed_words_count % 40000 == 0){
 			cout << "\rWords processed: " << processed_words_count <<
 					" | Total words: " << dictionary->getNumWords() << " (" << dictionary->getNumWords() * 100 /max_words << "%)" <<
-					" | Progress: " << corpus.getProgress() << "%" << flush;
+					" | Progress: " << corpus.getProgress()*100 << "%" << flush;
 		}
 
 	}
 
 	cout << "\rWords processed: " << processed_words_count <<
 						" | Total words: " << dictionary->getNumWords() << " (" << dictionary->getNumWords() * 100 /max_words << "%)" <<
-						" | Progress: " << int(corpus.getProgress()*100) << "%" << endl;
+						" | Progress: " << corpus.getProgress()*100 << "%" << endl;
 	delete[] win_idx;
 
 }
