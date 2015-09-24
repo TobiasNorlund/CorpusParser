@@ -35,6 +35,12 @@ Dictionary* CpuParser::getDictionary(){
 	return dictionary;
 }
 
+void print_window(vector<string> wind){
+	for(auto it = wind.begin(); it != wind.end(); ++it)
+		cout << *it << " ";
+	cout << endl;
+}
+
 
 void CpuParser::parse(Corpus& corpus, int k, int d, int epsilon, unsigned long max_cpu_mem){
 
@@ -62,37 +68,48 @@ void CpuParser::parse(Corpus& corpus, int k, int d, int epsilon, unsigned long m
 	for(wi = 0; wi < 2*k; ++wi){
 		corpus >> window[wi];
 		dictionary->newWord(window[wi]);
+		//print_window(window);
 	}
 
 	unsigned long processed_words_count = 2*k;
 
 	// Iterate through all words in corpus
-	char* win_idx = new char[2*k+1];
-	for(short i=0;i<2*k+1;++i) win_idx[i] = (i==k)?1:0;
-	while(corpus >> window[wi]){
+	char* win_idx = new char[2*k];
+	for(short i=0;i<2*k;++i) win_idx[i] = (i<k)?i-k:i-k+1;
+	try {
+		while(corpus >> window[wi]){
 
-		// Determine the focus word
-		int fwi = (wi-k) % win_size; // Focus word index (in window)
-		Context fContext = dictionary->getContext(window[fwi]);
+			//print_window(window);
 
-		// Loop over all words within window (except focus word)
-		short wj;
-		for(short j = 0; j < 2*k; ++j){
-			wj = (fwi + win_idx[j]) % win_size; // word index (in window)
-			IndexVector iv = dictionary->getIndexVector(window[wj]);
-			fContext.add(iv, j);
+			// Determine the focus word
+			int fwi = (win_size + wi-k) % win_size; // Focus word index (in window)
+			if(window[fwi] == "Volatility" || processed_words_count == 217611){
+				cout << "Hej" << endl;
+			}
+			Context fContext = dictionary->getContext(window[fwi]);
+
+			// Loop over all words within window (except focus word)
+			short wj;
+			for(short j = 0; j < 2*k; ++j){
+				wj = (win_size + fwi + win_idx[j]) % win_size; // word index (in window)
+				IndexVector iv = dictionary->getIndexVector(window[wj]);
+				fContext.add(iv, j);
+			}
+
+			// Update wi
+			wi = (wi + 1) % win_size;
+			processed_words_count += 1;
+			dictionary->incrementCount(window[fwi]);
+
+			if(processed_words_count % 40000 == 0){
+				cout << "\rWords processed: " << processed_words_count <<
+						" | Total words: " << dictionary->getNumWords() << " (" << dictionary->getNumWords() * 100 /max_words << "%)" <<
+						" | Progress: " << corpus.getProgress()*100 << "%" << flush;
+			}
+
 		}
-
-		// Update wi
-		wi = (wi + 1) % win_size;
-		processed_words_count += 1;
-
-		if(processed_words_count % 40000 == 0){
-			cout << "\rWords processed: " << processed_words_count <<
-					" | Total words: " << dictionary->getNumWords() << " (" << dictionary->getNumWords() * 100 /max_words << "%)" <<
-					" | Progress: " << corpus.getProgress()*100 << "%" << flush;
-		}
-
+	}catch (const runtime_error& error){
+		cout << "\rMaximum number of words exceeded. Stopping.                                " << endl;
 	}
 
 	cout << "\rWords processed: " << processed_words_count <<

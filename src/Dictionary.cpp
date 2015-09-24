@@ -13,6 +13,8 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -71,15 +73,22 @@ unsigned int Dictionary::getNumWords(){
 	return next_word_idx;
 }
 
+void Dictionary::incrementCount(string word){
+	++index_map[word].second;
+}
+
 /*
  * Assigns a new index vector and context if the word is unseen
  */
 void Dictionary::newWord(string word){
+	/*if(word == "Volatility"){
+		cout << "hejj" << endl;
+	}*/
 	if(index_map.find(word) == index_map.end()){
 		// Assign new word if not buffer full
 		if(next_word_idx == num_words)
 			throw runtime_error("Maximum number of words exceeded");
-		index_map[word] = next_word_idx++;
+		index_map[word].first = next_word_idx++;
 	}
 }
 
@@ -89,7 +98,7 @@ void Dictionary::newWord(string word){
 IndexVector Dictionary::getIndexVector(string word){
 	// Assign a new word if unseen
 	newWord(word);
-	return IndexVector((unsigned short*)(index_vectors + index_map[word]*epsilon), epsilon); // * sizeof(unsigned short)
+	return IndexVector((unsigned short*)(index_vectors + index_map[word].first*epsilon), epsilon); // * sizeof(unsigned short)
 }
 
 /**
@@ -98,7 +107,7 @@ IndexVector Dictionary::getIndexVector(string word){
 Context Dictionary::getContext(string word){
 	// Assign a new word if unseen
 	newWord(word);
-	return Context((int*)(contexts + index_map[word]*(2*k)*d), d); // * sizeof(int)
+	return Context((int*)(contexts + index_map[word].first*(2*k)*d), d); // * sizeof(int)
 }
 
 /*
@@ -117,8 +126,16 @@ void Dictionary::save(string dir, string name){
 	ofstream fi(dir + name + "-" + to_string(next_word_idx) + "-" + to_string(d) + ".index.bin", ios::out | ios::binary);
 
 	// Write map file
-	for(auto it : index_map)
-		fm << it.first << " ";
+	vector<pair<string, pair<unsigned int, unsigned int> >> pairs;
+	for (auto itr = index_map.begin(); itr != index_map.end(); ++itr)
+	    pairs.push_back(*itr);
+
+	sort(pairs.begin(), pairs.end(), [=](pair<string, pair<unsigned int, unsigned int>>& a, pair<string, pair<unsigned int, unsigned int>>& b)
+		{
+			return a.second.second > b.second.second;
+		});
+	for(auto it : pairs)
+		fm << it.first << "\t" << it.second.second << endl;
 	fm.close();
 
 	// Write index dump file

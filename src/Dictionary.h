@@ -23,6 +23,7 @@ public:
 	virtual ~Dictionary();
 
 	void newWord(std::string word);
+	void incrementCount(std::string word);
 	void save(std::string dir, std::string name);
 
 	IndexVector getIndexVector(std::string word);
@@ -39,7 +40,7 @@ private:
 	int epsilon;
 	int  k;
 
-	std::unordered_map<std::string, unsigned int> index_map;
+	std::unordered_map<std::string, std::pair<unsigned int, unsigned int>> index_map; // first = index, second = #count
 
 	unsigned int next_word_idx;
 };

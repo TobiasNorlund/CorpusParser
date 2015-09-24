@@ -77,7 +77,7 @@ int main(int argc, char** argv)
 
 	// Parse command line arguments
 	Corpus* corpus;
-	if (getCmdOption(argv,argv+argc, (string)"-corpus") == (string)"OneBCorpus")
+	if (cmdOptionExists(argv,argv+argc,"-corpus") && getCmdOption(argv,argv+argc, (string)"-corpus") == (string)"OneBCorpus")
 		corpus = new OneBCorpus("/home/tobiasnorlund/Code/Exjobb/corpus/1-billion-word-language-modeling-benchmark-r13output/training-monolingual.tokenized.shuffled/");
 	else
 		throw runtime_error("A valid corpus must be given.");
