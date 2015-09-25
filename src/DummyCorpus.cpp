@@ -25,6 +25,9 @@ float DummyCorpus::getProgress(){
 	return idx/3.0;
 }
 
+void DummyCorpus::reset(){
+	idx = 0;
+}
 
 bool DummyCorpus::operator>>(string& val){
 	string words[3] = {"the", "cat", "sat"};

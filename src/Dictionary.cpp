@@ -15,6 +15,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <math.h>
 
 using namespace std;
 
@@ -23,41 +24,93 @@ namespace model {
 /*
  * Allocates and generates num_words index and context matrices
  */
-Dictionary::Dictionary(unsigned int num_words, int d, int epsilon, int k){
+Dictionary::Dictionary(unsigned int max_words, unsigned int max_words_per_pass, int d, int epsilon, int k, string dump_path){
 
-	this->num_words = num_words;
+	this->max_words = max_words;
+	this->max_words_per_pass = max_words_per_pass;
 	this->d = d;
 	this->epsilon = epsilon;
 	this->k = k;
+	this->dump_path = dump_path;
 
-	// Init next_word_idx
-	next_word_idx = 0;
+	next_index = 0;
+	current_pass = 0;
 
 	// Allocate and initialize index vectors
 	srand(time(0));
-	index_vectors = (unsigned short*) malloc(num_words * epsilon * sizeof(unsigned short));
-	for (unsigned int i = 0; i < num_words * epsilon; ++i){
+	index_vectors = (unsigned short*) malloc(max_words * epsilon * sizeof(unsigned short));
+	for (unsigned int i = 0; i < max_words * epsilon; ++i){
 		index_vectors[i] = rand() % (d << 1);
 	}
 
-	// Allocate and initialize context matrices
-	contexts = (int*) malloc(num_words*(2*k)*d * sizeof(int));
-	memset(contexts, 0, num_words*(2*k)*d * sizeof(int)); // Init to 0
-
 }
 
-Dictionary::Dictionary(unsigned int num_words, int d, int epsilon, int k, unsigned short* idx_vectors, int* ctxs) {
+Dictionary::Dictionary(unsigned int max_words, unsigned int max_words_per_pass, int d, int epsilon, int k, string dump_path, unsigned short* index_vectors){
 
-	this->num_words = num_words;
+	this->max_words = max_words;
+	this->max_words_per_pass = max_words_per_pass;
 	this->d = d;
 	this->epsilon = epsilon;
 	this->k = k;
+	this->dump_path = dump_path;
 
-	// Init next_word_idx
-	next_word_idx = 0;
+	next_index = 0;
+	current_pass = 0;
 
-	index_vectors = idx_vectors;
-	contexts = ctxs;
+	// Allocate and initialize index vectors
+	this->index_vectors = index_vectors;
+
+}
+
+void Dictionary::initPass(){
+
+	current_pass++;
+
+	// Allocate and initialize context matrices
+	contexts = (int*) malloc(max_words_per_pass*(2*k)*d * sizeof(int));
+	memset(contexts, 0, max_words_per_pass*(2*k)*d * sizeof(int)); // Init to 0
+
+}
+
+void Dictionary::endPass(){
+
+	// Save contexts
+	ofstream fc(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + ".context.bin", ios::out | ios::binary | ios::app);
+	if (!fc || !fc.good()) throw runtime_error("Error saving contexts. Couldn't open/create file.");
+	fc.write((char*)contexts, max_words_per_pass * (2*k)*d * sizeof(int));
+	if (fc.fail()) throw runtime_error("Error saving contexts. Couldn't write data.");
+	fc.close();
+
+	// Write word map text file (sorted on occurance and unsorted)
+	ofstream fmo(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + ".map", ofstream::out);
+	for(auto it : meta_map)
+		fmo << it.first << " ";
+	fmo.close();
+	ofstream fmuo(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + ".ordered.map", ofstream::out);
+	vector<pair<string, meta_data >> pairs;
+	for (auto itr = meta_map.begin(); itr != meta_map.end(); ++itr)
+	    pairs.push_back(*itr);
+	sort(pairs.begin(), pairs.end(), [=](pair<string, meta_data>& a, pair<string, meta_data>& b)
+		{
+			return a.second.count > b.second.count;
+		});
+	for(auto it : pairs)
+		fmuo << it.first << "\t" << it.second.count << endl;
+	fmuo.close();
+
+	// If first pass, save index vectors as well
+	if(current_pass == 1){
+
+		// Write index dump file
+		ofstream fi(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + ".index.bin", ios::out | ios::binary);
+		fi.write((char*)index_vectors, next_index * epsilon * sizeof(unsigned short));
+		fi.close();
+
+	}
+
+	// Free the contexts
+	free(contexts);
+
 }
 
 Dictionary::~Dictionary() {
@@ -70,25 +123,29 @@ Dictionary::~Dictionary() {
 }
 
 unsigned int Dictionary::getNumWords(){
-	return next_word_idx;
+	return next_index;
 }
 
 void Dictionary::incrementCount(string word){
-	++index_map[word].second;
+	++meta_map[word].count;
 }
 
 /*
  * Assigns a new index vector and context if the word is unseen
  */
 void Dictionary::newWord(string word){
-	/*if(word == "Volatility"){
-		cout << "hejj" << endl;
-	}*/
-	if(index_map.find(word) == index_map.end()){
+	if(meta_map.find(word) == meta_map.end()){
 		// Assign new word if not buffer full
-		if(next_word_idx == num_words)
-			throw runtime_error("Maximum number of words exceeded");
-		index_map[word].first = next_word_idx++;
+		if(next_index == max_words)
+			throw runtime_error("Maximum total number of words exceeded");
+
+		meta_map[word] = {
+				next_index, // index_index
+				next_index % max_words_per_pass, //context_index
+				0, //count
+				1+ next_index/max_words_per_pass // pass
+		};
+		next_index++;
 	}
 }
 
@@ -98,16 +155,24 @@ void Dictionary::newWord(string word){
 IndexVector Dictionary::getIndexVector(string word){
 	// Assign a new word if unseen
 	newWord(word);
-	return IndexVector((unsigned short*)(index_vectors + index_map[word].first*epsilon), epsilon); // * sizeof(unsigned short)
+	return IndexVector((unsigned short*)(index_vectors + meta_map[word].index_index*epsilon), epsilon); // * sizeof(unsigned short)
 }
 
 /**
  * Returns the word's corresponding context.
  */
-Context Dictionary::getContext(string word){
+Context* Dictionary::getContext(string word){
 	// Assign a new word if unseen
 	newWord(word);
-	return Context((int*)(contexts + index_map[word].first*(2*k)*d), d); // * sizeof(int)
+	if(meta_map[word].pass != current_pass)
+		throw runtime_error("Word not in this pass");
+	return new Context((int*)(contexts + meta_map[word].context_index*(2*k)*d), d); // * sizeof(int)
+}
+
+short Dictionary::getPass(string word){
+	if(meta_map.find(word) == meta_map.end())
+		throw runtime_error("Word '" + word + "' is not present in the Dictionary");
+	return meta_map[word].pass;
 }
 
 /*
@@ -121,7 +186,7 @@ Context Dictionary::getContext(string word){
  */
 void Dictionary::save(string dir, string name){
 
-	ofstream fm(dir + name + "-" + to_string(next_word_idx) + "-" + to_string(d) + ".map", ofstream::out);
+	/*ofstream fm(dir + name + "-" + to_string(next_word_idx) + "-" + to_string(d) + ".map", ofstream::out);
 	ofstream fc(dir + name + "-" + to_string(next_word_idx) + "-" + to_string(d) + ".context.bin", ios::out | ios::binary);
 	ofstream fi(dir + name + "-" + to_string(next_word_idx) + "-" + to_string(d) + ".index.bin", ios::out | ios::binary);
 
@@ -144,7 +209,7 @@ void Dictionary::save(string dir, string name){
 
 	// Write context dump file
 	fc.write((char*)contexts, next_word_idx * (2*k)*d * sizeof(int));
-	fc.close();
+	fc.close();*/
 
 }
 

@@ -18,16 +18,20 @@ namespace model {
 class Dictionary {
 	friend class CpuParser;
 public:
-	Dictionary(unsigned int num_words, int d, int epsilon, int k);
-	Dictionary(unsigned int num_words, int d, int epsilon, int k, unsigned short* index_vectors, int* contexts);
+	Dictionary(unsigned int max_words, unsigned int max_words_per_pass, int d, int epsilon, int k, std::string dump_path);
+	Dictionary(unsigned int max_words, unsigned int max_words_per_pass, int d, int epsilon, int k, std::string dump_path, unsigned short* index_vectors);
 	virtual ~Dictionary();
+
+	void initPass();
+	void endPass();
 
 	void newWord(std::string word);
 	void incrementCount(std::string word);
-	void save(std::string dir, std::string name);
-
+	short getPass(std::string word);
 	IndexVector getIndexVector(std::string word);
-	Context	getContext(std::string word);
+	Context*	getContext(std::string word);
+
+	void save(std::string dir, std::string name);
 	unsigned int getNumWords();
 
 	unsigned short* index_vectors;
@@ -35,14 +39,25 @@ public:
 
 private:
 
-	unsigned int num_words;
+	struct meta_data {
+		unsigned int index_index; // Index in the index_vectors
+		unsigned int context_index; // Index in the contexts, in its pass
+		unsigned int count;
+		short pass;
+	};
+
+	unsigned int max_words;
+	unsigned int max_words_per_pass;
 	int d;
 	int epsilon;
-	int  k;
+	int k;
 
-	std::unordered_map<std::string, std::pair<unsigned int, unsigned int>> index_map; // first = index, second = #count
+	std::unordered_map<std::string, meta_data> meta_map; // first = index, second = #count
 
-	unsigned int next_word_idx;
+	unsigned int next_index;
+	short current_pass;
+
+	std::string dump_path;
 };
 
 } // end namespace: model

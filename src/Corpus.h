@@ -19,6 +19,7 @@ public:
 
 	virtual float getProgress() =0;
 	virtual bool operator>>(std::string& val) =0;
+	virtual void reset() =0;
 
 	virtual std::string toString() =0;
 };

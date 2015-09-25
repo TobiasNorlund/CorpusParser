@@ -59,6 +59,12 @@ bool OneBCorpus::operator>>(string& val){
 	return res;
 }
 
+void OneBCorpus::reset(){
+	closeFile();
+	current_file = 1;
+	initFile(current_file);
+}
+
 string OneBCorpus::toString(){
 	return "OneBCorpus";
 }

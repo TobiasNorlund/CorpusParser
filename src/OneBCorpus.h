@@ -21,6 +21,7 @@ public:
 
 	float getProgress();
 	bool operator>>(std::string& val);
+	void reset();
 
 	std::string toString();
 
