@@ -96,7 +96,7 @@ int main(int argc, char** argv)
 	// Create parser
 	CpuParser parser;
 
-	parser.parse(*corpus, k, d, epsilon, max_cpu_mem, max_words, "/media/tobiasnorlund/ac861917-9ad7-4905-93e9-ee6ab16360ad/bigdata/Dump/" + corpus->toString());
+	parser.parse(*corpus, k, d, epsilon, max_cpu_mem, max_words, "/media/tobiasnorlund/ac861917-9ad7-4905-93e9-ee6ab16360ad/bigdata/Dump/" + corpus->toString());//"/home/tobiasnorlund/Code/Dump/" + corpus->toString());
 
 	cout << "Parse complete!" << endl;
 	//cout << "Saving ...";

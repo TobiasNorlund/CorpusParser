@@ -74,19 +74,23 @@ void Dictionary::initPass(){
 
 void Dictionary::endPass(){
 
+	unsigned int words_in_this_pass = (current_pass < ceil((float)next_index / max_words_per_pass))?max_words_per_pass:next_index % max_words_per_pass;
+
 	// Save contexts
-	ofstream fc(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + ".context.bin", ios::out | ios::binary | ios::app);
+	auto flags = ios::out | ios::binary;
+	if(current_pass > 1) flags |= ios::app;
+	ofstream fc(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + "-" + to_string(k) + ".context.bin", flags);
 	if (!fc || !fc.good()) throw runtime_error("Error saving contexts. Couldn't open/create file.");
-	fc.write((char*)contexts, max_words_per_pass * (2*k)*d * sizeof(int));
-	if (fc.fail()) throw runtime_error("Error saving contexts. Couldn't write data.");
+	fc.write((char*)contexts, words_in_this_pass * (2*k)*d * sizeof(int));
+	if (fc.fail()) throw runtime_error("Error saving contexts. Couldn't write data. ");
 	fc.close();
 
 	// Write word map text file (sorted on occurance and unsorted)
-	ofstream fmo(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + ".map", ofstream::out);
+	ofstream fmo(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + "-" + to_string(k) + ".map", ofstream::out);
 	for(auto it : meta_map)
 		fmo << it.first << " ";
 	fmo.close();
-	ofstream fmuo(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + ".ordered.map", ofstream::out);
+	ofstream fmuo(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + "-" + to_string(k) + ".ordered.map", ofstream::out);
 	vector<pair<string, meta_data >> pairs;
 	for (auto itr = meta_map.begin(); itr != meta_map.end(); ++itr)
 	    pairs.push_back(*itr);
@@ -102,7 +106,7 @@ void Dictionary::endPass(){
 	if(current_pass == 1){
 
 		// Write index dump file
-		ofstream fi(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + ".index.bin", ios::out | ios::binary);
+		ofstream fi(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + "-" + to_string(k) + ".index.bin", ios::out | ios::binary);
 		fi.write((char*)index_vectors, next_index * epsilon * sizeof(unsigned short));
 		fi.close();
 
@@ -143,7 +147,7 @@ void Dictionary::newWord(string word){
 				next_index, // index_index
 				next_index % max_words_per_pass, //context_index
 				0, //count
-				1+ next_index/max_words_per_pass // pass
+				1+next_index/max_words_per_pass // pass
 		};
 		next_index++;
 	}

@@ -124,7 +124,7 @@ void CpuParser::parse(Corpus& corpus, int k, int d, int epsilon, unsigned long m
 		dictionary->endPass();
 		corpus.reset();
 
-		passes_needed = dictionary->getNumWords() / max_words_per_pass;
+		passes_needed = ceil((float)dictionary->getNumWords() / max_words_per_pass);
 
 	}while(++pass <= passes_needed);
 
