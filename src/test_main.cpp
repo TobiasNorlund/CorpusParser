@@ -46,13 +46,6 @@ void testRI(){
 
 }
 
-void testOneBCorpus(){
-	OneBCorpus corpus("/home/tobiasnorlund/Code/Exjobb/corpus/1-billion-word-language-modeling-benchmark-r13output/training-monolingual.tokenized.shuffled/news.en-00001-of-00100");
-	string word;
-	while(corpus >> word)
-		cout << word << endl;
-}
-
 void testCpuParser(){
 
 	string dump_path = "/home/tobiasnorlund/Code/Dump/ParserTest";
@@ -105,7 +98,7 @@ int main(int argc, char** argv)
 {
 	//testRI();
 	//testOneBCorpus();
-	testCpuParser();
+	//testCpuParser();
 
 	// Parse command line arguments
 	Corpus* corpus;
@@ -123,7 +116,6 @@ int main(int argc, char** argv)
 
 	// Create parser
 	CpuParser parser;
-
 	parser.parse(*corpus, k, d, epsilon, c, max_cpu_mem, max_words, "/media/tobiasnorlund/ac861917-9ad7-4905-93e9-ee6ab16360ad/bigdata/Dump/" + corpus->toString());//"/home/tobiasnorlund/Code/Dump/" + corpus->toString());
 
 	cout << "Parse complete!" << endl;

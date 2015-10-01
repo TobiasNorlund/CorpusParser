@@ -10,6 +10,7 @@
 
 #include "Corpus.h"
 #include "Dictionary.h"
+#include <vector>
 
 class CpuParser {
 public:
@@ -25,6 +26,8 @@ private:
 	model::Dictionary* dictionary;
 
 	float getWordWeight(std::string word, float c);
+
+	std::vector<std::string> split(std::string str, char delimiter);
 };
 
 #endif /* CPUPARSER_H_ */

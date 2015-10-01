@@ -1,40 +1,35 @@
 /*
- * OneBCorpus.h
+ * WikipediaCorpus.h
  *
- *  Created on: Sep 22, 2015
+ *  Created on: Oct 1, 2015
  *      Author: tobiasnorlund
  */
 
-#ifndef ONEBCORPUS_H_
-#define ONEBCORPUS_H_
+#ifndef WIKIPEDIACORPUS_H_
+#define WIKIPEDIACORPUS_H_
 
 #include "Corpus.h"
+#include <string>
 #include <iostream>
 #include <fstream>
 
 namespace model {
 
-class OneBCorpus: public model::Corpus {
+class WikipediaCorpus: public model::Corpus {
 public:
-	OneBCorpus(std::string dir);
-	virtual ~OneBCorpus();
+	WikipediaCorpus(std::string filepath);
+	virtual ~WikipediaCorpus();
 
 	float getProgress();
 	bool read_line(std::string& val);
 	void reset();
 
 	std::string toString();
-
 private:
-	std::string dir;
-	int current_file;
 	std::ifstream* file;
 	unsigned long total_size;
 	unsigned long total_read;
-
-	void initFile(int ind);
-	void closeFile();
 };
 
 } /* namespace model */
-#endif /* ONEBCORPUS_H_ */
+#endif /* WIKIPEDIACORPUS_H_ */

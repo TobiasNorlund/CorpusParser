@@ -18,7 +18,7 @@ public:
 	virtual ~Corpus();
 
 	virtual float getProgress() =0;
-	virtual bool operator>>(std::string& val) =0;
+	virtual bool read_line(std::string& line) =0;
 	virtual void reset() =0;
 
 	virtual std::string toString() =0;

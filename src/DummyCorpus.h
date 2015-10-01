@@ -18,7 +18,7 @@ public:
 	virtual ~DummyCorpus();
 
 	float getProgress();
-	bool operator>>(std::string& val);
+	bool read_line(std::string& line);
 	void reset();
 
 	std::string toString();

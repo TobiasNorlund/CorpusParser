@@ -12,6 +12,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <sstream>
 #include <math.h>
 
 using namespace model;
@@ -75,6 +76,7 @@ void CpuParser::parse(Corpus& corpus, int k, int d, int epsilon, float c, unsign
 
 	int wi;
 	unsigned long processed_words_count = 2*k;
+	string line = "";
 
 	// Iterate through all words in corpus
 	short pass = 1;
@@ -82,48 +84,58 @@ void CpuParser::parse(Corpus& corpus, int k, int d, int epsilon, float c, unsign
 
 		dictionary->initPass();
 
-		// Read first window
-		for(wi = 0; wi < 2*k; ++wi){
-			corpus >> window[wi];
-			dictionary->newWord(window[wi]);
-			if(pass == 1) dictionary->incrementCount(window[wi]);
-		}
+		// Read a line (paragraph)
+		while(corpus.read_line(line)){
 
-		while(corpus >> window[wi]){
+			// Split line to words
+			vector<string> words = split(line, ' ');
+			//print_window(words);
+			int li = 0; // Line index
+			wi = 0;
 
-			// Add word to dictionary if unseen and increment count in first pass
-			if(dictionary->newWord(window[wi]) && pass == 1)
-				dictionary->incrementCount(window[wi]);
+			for(li; li<words.size()+k; ++li){
 
-			// Determine the focus word
-			int fwi = (win_size + wi-k) % win_size; // Focus word index (in window)
-			Context* fContext;
+				if(li<words.size()){
+					window[wi] = words[li];
+					//cout << window[wi] << endl;
 
-			// Only process focus word if in dictionary and if in this pass, otherwise skip this iteration
-			if(dictionary->newWord(window[fwi]) && dictionary->getPass(window[fwi]) == pass){
-				fContext = dictionary->getContext(window[fwi]);
-
-				// Loop over all words within window (except focus word)
-				short wj;
-				for(short j = 0; j < 2*k; ++j){
-					wj = (win_size + fwi + win_idx[j]) % win_size; // word index (in window)
-					if(dictionary->newWord(window[wj])){ // If word has an index vector
-						IndexVector iv = dictionary->getIndexVector(window[wj]);
-						fContext->add(iv, j, getWordWeight(window[wj], c));
-					}
+					// Add word to dictionary if unseen and increment count in first pass
+					if(dictionary->newWord(window[wi]) && pass == 1)
+						dictionary->incrementCount(window[wi]);
 				}
-				delete fContext;
-			}
 
-			// Update wi
-			wi = (wi + 1) % win_size;
-			processed_words_count += 1;
+				// Determine the focus word
+				int fwi = (win_size + wi-k) % win_size; // Focus word index (in window)
+				Context* fContext;
+				//cout << "focus: " << window[fwi] << endl;
 
-			if(processed_words_count % 40000 == 0){
-				string passes_str = to_string(pass); if(passes_needed != 0) passes_str += " (of " + to_string(passes_needed) + ")";
-				cout << "\rPass: " << passes_str <<
-						" | Total words: " << dictionary->getNumWords() << " (" << dictionary->getNumWords() * 100 /max_words << "%)" <<
-						" | Progress: " << corpus.getProgress()*100 << "%" << flush;
+				// Only process focus word if in dictionary, if in this pass and if focus word is in sentence (not in the first k iterations), otherwise skip this iteration
+				if(dictionary->newWord(window[fwi]) && dictionary->getPass(window[fwi]) == pass && li-k >=0){
+					fContext = dictionary->getContext(window[fwi]);
+
+					// Loop over all words within window (except focus word)
+					short wj;
+					for(short j = 0; j < 2*k; ++j){
+						wj = (win_size + fwi + win_idx[j]) % win_size; // word index (in window)
+						if(dictionary->newWord(window[wj]) && (li-k) + win_idx[j] >= 0 && (li-k) + win_idx[j] < words.size()){ // If word has an index vector and window word is within line
+							//cout << window[wj] << endl;
+							IndexVector iv = dictionary->getIndexVector(window[wj]);
+							fContext->add(iv, j, getWordWeight(window[wj], c));
+						}
+					}
+					delete fContext;
+				}
+
+				// Update wi
+				wi = (wi + 1) % win_size;
+				processed_words_count += 1;
+
+				if(processed_words_count % 40000 == 0){
+					string passes_str = to_string(pass); if(passes_needed != 0) passes_str += " (of " + to_string(passes_needed) + ")";
+					cout << "\rPass: " << passes_str <<
+							" | Total words: " << dictionary->getNumWords() << " (" << dictionary->getNumWords() * 100 /max_words << "%)" <<
+							" | Progress: " << corpus.getProgress()*100 << "%" << flush;
+				}
 			}
 		}
 
@@ -143,4 +155,16 @@ void CpuParser::parse(Corpus& corpus, int k, int d, int epsilon, float c, unsign
 
 	delete[] win_idx;
 
+}
+
+vector<string> CpuParser::split(string str, char delimiter) {
+  vector<string> internal;
+  stringstream ss(str); // Turn the string into a stream.
+  string tok;
+
+  while(getline(ss, tok, delimiter)) {
+    internal.push_back(tok);
+  }
+
+  return internal;
 }

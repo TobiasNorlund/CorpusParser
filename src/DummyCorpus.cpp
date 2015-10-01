@@ -29,7 +29,14 @@ void DummyCorpus::reset(){
 	idx = 0;
 }
 
-bool DummyCorpus::operator>>(string& val){
+bool DummyCorpus::read_line(string& line){
+	if(idx++ == 0){
+		line = "the cat sat";
+		return true;
+	}else
+		return false;
+}
+/*bool DummyCorpus::operator>>(string& val){
 	string words[3] = {"the", "cat", "sat"};
 	if(idx < 3){
 		val = words[idx++];
@@ -37,7 +44,7 @@ bool DummyCorpus::operator>>(string& val){
 	}else{
 		return false;
 	}
-}
+}*/
 
 string DummyCorpus::toString(){
 	return "DummyCorpus";

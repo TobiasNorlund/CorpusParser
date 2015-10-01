@@ -48,7 +48,17 @@ float OneBCorpus::getProgress(){
 	return ((float)total_read) / (total_size * 99) + ((float)current_file-1)/99;
 }
 
-bool OneBCorpus::operator>>(string& val){
+bool OneBCorpus::read_line(string& line){
+	bool res = (bool) getline(*file, line);
+	if(!res && current_file < 99){
+		closeFile();
+		initFile(++current_file);
+		res = (bool) getline(*file, line);
+	}
+	total_read += line.size() + 1;
+	return res;
+}
+/*bool OneBCorpus::operator>>(string& val){
 	bool res = (bool)(*file >> val);
 	if(!res && current_file < 99){
 		closeFile();
@@ -57,7 +67,7 @@ bool OneBCorpus::operator>>(string& val){
 	}
 	total_read += val.size() + 1;
 	return res;
-}
+}*/
 
 void OneBCorpus::reset(){
 	closeFile();
