@@ -25,9 +25,10 @@ public:
 	void initPass();
 	void endPass();
 
-	void newWord(std::string word);
+	bool newWord(std::string word);
 	void incrementCount(std::string word);
 	short getPass(std::string word);
+	unsigned int getCount(std::string word);
 	IndexVector getIndexVector(std::string word);
 	Context*	getContext(std::string word);
 
@@ -35,7 +36,7 @@ public:
 	unsigned int getNumWords();
 
 	unsigned short* index_vectors;
-	int* contexts;
+	float* contexts;
 
 private:
 

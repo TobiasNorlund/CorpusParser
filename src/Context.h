@@ -14,13 +14,13 @@ namespace model {
 
 class Context {
 public:
-	Context(int* source, unsigned short d) : source{source}, d{d} {};
+	Context(float* source, unsigned short d) : source{source}, d{d} {};
 	virtual ~Context();
 
-	void add(IndexVector& vec, short relWindPos);
-	int get(short relWindPos, unsigned short dim);
+	void add(IndexVector& vec, short relWindPos, float weight);
+	float get(short relWindPos, unsigned short dim);
 private:
-	int* source;
+	float* source;
 	unsigned short d; // Word dimensionality
 };
 

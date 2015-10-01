@@ -14,14 +14,14 @@ Context::~Context() {
 	// TODO Auto-generated destructor stub
 }
 
-void Context::add(IndexVector& vec, short relWindPos){
+void Context::add(IndexVector& vec, short relWindPos, float weight){
 	short epsilon = vec.getEpsilon();
 	for(short i = 0; i < epsilon; ++i){
-		*(source + relWindPos * d + vec.getIndexAt(i)) += vec.getValueAt(i);
+		*(source + relWindPos * d + vec.getIndexAt(i)) += weight * vec.getValueAt(i);
 	}
 }
 
-int Context::get(short relWindPos, unsigned short dim){
+float Context::get(short relWindPos, unsigned short dim){
 	return *(source + relWindPos*d + dim);
 }
 

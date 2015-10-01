@@ -22,23 +22,20 @@ void testRI(){
 	tmp_idx[0] = 123;
 	tmp_idx[1] = 456;
 
-	//int* tmp_ctx = (int*) malloc(num_words*(2*k)*d * sizeof(int));
-	//memset(tmp_ctx, 0, num_words*(2*k)*d * sizeof(int)); // Init to 0
-
 	Dictionary dict(max_words, max_words, d, epsilon, k, "", tmp_idx);
 	dict.initPass();
 
 	IndexVector i1 = dict.getIndexVector("hej");
 	Context* c1 = dict.getContext("hej");
 
-	c1->add(i1, 0);
-	c1->add(i1, 1);
+	c1->add(i1, 0, 1);
+	c1->add(i1, 1, 1);
 
 	if(i1.getSource()[0] != 123 ||
 			i1.getSource()[1] != 456 ||
 			i1.getValueAt(1) != -1 ||
 			i1.getIndexAt(1) != 228 ||
-			c1->get(0, 228) != -1 ||
+			c1->get(0, 228) != -1 || // Dangerous !!
 			c1->get(1, 61) != 1
 			){
 		delete c1;
@@ -56,6 +53,39 @@ void testOneBCorpus(){
 		cout << word << endl;
 }
 
+void testCpuParser(){
+
+	string dump_path = "/home/tobiasnorlund/Code/Dump/ParserTest";
+	unsigned int max_words = 2;
+	int d = 1000;
+	int epsilon = 1;
+	int k = 1;
+	float c = 1;
+	unsigned int max_cpu_mem = 30000;
+	unsigned int max_words_per_pass = (max_cpu_mem - sizeof(short)*epsilon*max_words) / (sizeof(float)*d * k*2);
+
+	unsigned short* tmp_idx = (unsigned short*) malloc(max_words * epsilon * sizeof(unsigned short));
+	tmp_idx[0] = 123; // 1 at index 61
+	tmp_idx[1] = 456; // -1  at index 228
+	tmp_idx[2] = 789; // 1 at index 394
+
+	DummyCorpus corpus;
+	Dictionary* dict = new Dictionary(max_words, max_words_per_pass, d, epsilon, k, dump_path, tmp_idx);
+
+	CpuParser parser(dict);
+	parser.parse(corpus, k, d, epsilon, c, max_cpu_mem, max_words, dump_path);
+
+	if(dict->getNumWords() != 2)
+		throw runtime_error("Test Parser Error: Not correct number of words in corpus");
+
+	Context* cCat = dict->getContext("cat");
+	if(cCat->get(0, 61) <= 0 ||
+	   cCat->get(1, 394) != 0)
+		throw runtime_error("Test Parser Error: Bad value in context");
+
+	delete dict;
+}
+
 char* getCmdOption(char ** begin, char ** end, const std::string & option)
 {
     char ** itr = find(begin, end, option);
@@ -71,14 +101,11 @@ bool cmdOptionExists(char** begin, char** end, const std::string& option)
     return find(begin, end, option) != end;
 }
 
-Context* temp(){
-	throw runtime_error("tewt");
-}
-
 int main(int argc, char** argv)
 {
-	testRI();
+	//testRI();
 	//testOneBCorpus();
+	testCpuParser();
 
 	// Parse command line arguments
 	Corpus* corpus;
@@ -90,19 +117,16 @@ int main(int argc, char** argv)
 	int k = (cmdOptionExists(argv,argv+argc,"-k")) ? atoi(getCmdOption(argv,argv+argc,"-k")) : 2 ;
 	int d = (cmdOptionExists(argv,argv+argc,"-d")) ? atoi(getCmdOption(argv,argv+argc,"-d")) : 2000;
 	int epsilon = (cmdOptionExists(argv,argv+argc,"-e")) ? atoi(getCmdOption(argv,argv+argc,"-e")) : 10;
+	int c = (cmdOptionExists(argv,argv+argc,"-c")) ? atoi(getCmdOption(argv,argv+argc,"-c")) : -5;
 	unsigned int max_words = (cmdOptionExists(argv,argv+argc,"-w")) ? atoi(getCmdOption(argv,argv+argc,"-w")) : 3000000 ;
 	unsigned long max_cpu_mem = (cmdOptionExists(argv,argv+argc,"-mem")) ? atol(getCmdOption(argv,argv+argc,"-mem")) : 1000000000L;
 
 	// Create parser
 	CpuParser parser;
 
-	parser.parse(*corpus, k, d, epsilon, max_cpu_mem, max_words, "/media/tobiasnorlund/ac861917-9ad7-4905-93e9-ee6ab16360ad/bigdata/Dump/" + corpus->toString());//"/home/tobiasnorlund/Code/Dump/" + corpus->toString());
+	parser.parse(*corpus, k, d, epsilon, c, max_cpu_mem, max_words, "/media/tobiasnorlund/ac861917-9ad7-4905-93e9-ee6ab16360ad/bigdata/Dump/" + corpus->toString());//"/home/tobiasnorlund/Code/Dump/" + corpus->toString());
 
 	cout << "Parse complete!" << endl;
-	//cout << "Saving ...";
-
-	//Dictionary* result = parser.getDictionary();
-	//result->save("/home/tobiasnorlund/Code/Dump/", corpus->toString());
 
 	delete corpus;
 

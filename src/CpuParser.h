@@ -17,13 +17,14 @@ public:
 	CpuParser(model::Dictionary* dictionary);
 	virtual ~CpuParser();
 
-	void parse(model::Corpus& corpus, int k, int d, int epsilon, unsigned long max_cpu_mem, unsigned int max_words, std::string dump_path);
+	void parse(model::Corpus& corpus, int k, int d, int epsilon, float c, unsigned long max_cpu_mem, unsigned int max_words, std::string dump_path);
 
 	model::Dictionary* getDictionary();
 private:
 	bool dictSpecified = false;
 	model::Dictionary* dictionary;
 
+	float getWordWeight(std::string word, float c);
 };
 
 #endif /* CPUPARSER_H_ */
