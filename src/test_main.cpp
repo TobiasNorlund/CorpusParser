@@ -5,8 +5,10 @@
 #include <stdexcept>
 #include "CpuParser.h"
 #include "DummyCorpus.h"
+#include "WikipediaCorpus.h"
 #include "OneBCorpus.h"
 #include <algorithm>
+
 
 using namespace std;
 using namespace model;
@@ -79,6 +81,28 @@ void testCpuParser(){
 	delete dict;
 }
 
+void testWikiParser(){
+	WikipediaCorpus corpus("/bigdata/public/wikipedia/en/wiki.2010.txt");
+
+	cout << "Reads first pass..." << endl;
+	string line = "";
+	unsigned long i = 0;
+	while(corpus.read_line(line)){
+		corpus.read_line(line);
+		if(i++ % 10000000 == 0)
+			cout << "\r" + to_string(corpus.getProgress());
+	}
+
+	cout << "Resets" << endl;
+
+	corpus.reset();
+
+	for(int i = 0; i<=5; ++i){
+		corpus.read_line(line);
+		cout << line << endl;
+	}
+}
+
 char* getCmdOption(char ** begin, char ** end, const std::string & option)
 {
     char ** itr = find(begin, end, option);
@@ -99,11 +123,14 @@ int main(int argc, char** argv)
 	//testRI();
 	//testOneBCorpus();
 	//testCpuParser();
+	//testWikiParser();
 
 	// Parse command line arguments
 	Corpus* corpus;
 	if (cmdOptionExists(argv,argv+argc,"-corpus") && getCmdOption(argv,argv+argc, (string)"-corpus") == (string)"OneBCorpus")
 		corpus = new OneBCorpus("/home/tobiasnorlund/Code/Exjobb/corpus/1-billion-word-language-modeling-benchmark-r13output/training-monolingual.tokenized.shuffled/");
+	else if(cmdOptionExists(argv,argv+argc,"-corpus") && getCmdOption(argv,argv+argc, (string)"-corpus") == (string)"Wikipedia")
+		corpus = new WikipediaCorpus("/home/tobiasnorlund/Code/Corpus/wiki.2010.txt");
 	else
 		throw runtime_error("A valid corpus must be given.");
 
@@ -116,7 +143,7 @@ int main(int argc, char** argv)
 
 	// Create parser
 	CpuParser parser;
-	parser.parse(*corpus, k, d, epsilon, c, max_cpu_mem, max_words, "/media/tobiasnorlund/ac861917-9ad7-4905-93e9-ee6ab16360ad/bigdata/Dump/" + corpus->toString());//"/home/tobiasnorlund/Code/Dump/" + corpus->toString());
+	parser.parse(*corpus, k, d, epsilon, c, max_cpu_mem, max_words, "/media/tobiasnorlund/ac861917-9ad7-4905-93e9-ee6ab16360ad/bigdata/Dump/" + corpus->toString());//"/home/tobiasnorlund/Code/Dump/" + corpus->toString());//
 
 	cout << "Parse complete!" << endl;
 

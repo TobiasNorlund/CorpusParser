@@ -51,7 +51,8 @@ void CpuParser::parse(Corpus& corpus, int k, int d, int epsilon, float c, unsign
 	size_t win_size = 2*k+1;
 
 	// Calculate how to distribute this job
-	unsigned int max_words_per_pass = (max_cpu_mem - sizeof(short)*epsilon*max_words) / (sizeof(float)*d * k*2);
+	int max_words_per_pass = (max_cpu_mem - sizeof(short)*epsilon*max_words) / (sizeof(float)*d * k*2);
+	if(max_words_per_pass < 0) throw runtime_error("Max memory allowed too low");
 	short passes_needed = 0;
 
 	if(!dictSpecified)

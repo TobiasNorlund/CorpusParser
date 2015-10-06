@@ -40,7 +40,9 @@ bool WikipediaCorpus::read_line(string& line){
 
 void WikipediaCorpus::reset(){
 	// Seek file to beginning
+	file->clear();
 	file->seekg(0, file->beg);
+	total_read = 0;
 }
 
 string WikipediaCorpus::toString(){
