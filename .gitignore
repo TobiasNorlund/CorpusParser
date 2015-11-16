@@ -4,3 +4,4 @@ Debug/GpuParse
 .project
 .cproject
 *~
+/Debug/

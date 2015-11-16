@@ -97,7 +97,7 @@ void Dictionary::endPass(){
 		ofstream fmo(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + "-" + to_string(k) + ".map", ofstream::out);
 		vector<pair<string, meta_data >> pairs;
 		for (auto itr = meta_map.begin(); itr != meta_map.end(); ++itr)	pairs.push_back(*itr);
-		sort(pairs.begin(), pairs.end(), [=](pair<string, meta_data>& a, pair<string, meta_data>& b)
+		sort(pairs.begin(), pairs.end(), [=](pair<string, meta_data> const& a, pair<string, meta_data> const& b)
 			{
 				return a.second.index_index < b.second.index_index;
 			});
@@ -109,7 +109,7 @@ void Dictionary::endPass(){
 		pairs.clear();
 		for (auto itr = meta_map.begin(); itr != meta_map.end(); ++itr)
 		    pairs.push_back(*itr);
-		sort(pairs.begin(), pairs.end(), [=](pair<string, meta_data>& a, pair<string, meta_data>& b)
+		sort(pairs.begin(), pairs.end(), [=](pair<string, meta_data> const& a, pair<string, meta_data> const& b)
 			{
 				return a.second.count > b.second.count;
 			});

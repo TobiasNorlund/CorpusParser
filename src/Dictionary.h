@@ -16,7 +16,7 @@
 namespace model {
 
 class Dictionary {
-	friend class CpuParser;
+	//friend class CpuParser;
 public:
 	Dictionary(unsigned int max_words, unsigned int max_words_per_pass, int d, int epsilon, int k, std::string dump_path);
 	Dictionary(unsigned int max_words, unsigned int max_words_per_pass, int d, int epsilon, int k, std::string dump_path, unsigned short* index_vectors);
