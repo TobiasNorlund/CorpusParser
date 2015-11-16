@@ -27,6 +27,7 @@ public:
 
 	bool newWord(std::string word);
 	void incrementCount(std::string word);
+	void incrementContextCount(std::string word);
 	short getPass(std::string word);
 	unsigned int getCount(std::string word);
 	IndexVector getIndexVector(std::string word);
@@ -43,7 +44,8 @@ private:
 	struct meta_data {
 		unsigned int index_index; // Index in the index_vectors
 		unsigned int context_index; // Index in the contexts, in its pass
-		unsigned int count;
+		unsigned int focus_count; // Number of times occurred as focus word
+		unsigned int context_count; // Number of times occurred as context
 		short pass;
 	};
 

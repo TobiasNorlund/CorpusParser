@@ -31,7 +31,7 @@ void DummyCorpus::reset(){
 
 bool DummyCorpus::read_line(string& line){
 	if(idx++ == 0){
-		line = "the cat sat";
+		line = "the cat sat on";
 		return true;
 	}else
 		return false;

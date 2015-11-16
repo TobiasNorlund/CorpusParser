@@ -130,7 +130,9 @@ int main(int argc, char** argv)
 	if (cmdOptionExists(argv,argv+argc,"-corpus") && getCmdOption(argv,argv+argc, (string)"-corpus") == (string)"OneBCorpus")
 		corpus = new OneBCorpus("/home/tobiasnorlund/Code/Exjobb/corpus/1-billion-word-language-modeling-benchmark-r13output/training-monolingual.tokenized.shuffled/");
 	else if(cmdOptionExists(argv,argv+argc,"-corpus") && getCmdOption(argv,argv+argc, (string)"-corpus") == (string)"Wikipedia")
-		corpus = new WikipediaCorpus("/home/tobiasnorlund/Code/Corpus/wiki.2010.txt");
+		corpus = new WikipediaCorpus("/home/tobiasnorlund/Corpus/wiki.2010.txt");
+	else if(cmdOptionExists(argv,argv+argc,"-corpus") && getCmdOption(argv,argv+argc, (string)"-corpus") == (string)"DummyCorpus")
+		corpus = new DummyCorpus();
 	else
 		throw runtime_error("A valid corpus must be given.");
 

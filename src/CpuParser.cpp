@@ -111,15 +111,16 @@ void CpuParser::parse(Corpus& corpus, int k, int d, int epsilon, float c, unsign
 				//cout << "focus: " << window[fwi] << endl;
 
 				// Only process focus word if in dictionary, if in this pass and if focus word is in sentence (not in the first k iterations), otherwise skip this iteration
-				if(dictionary->newWord(window[fwi]) && dictionary->getPass(window[fwi]) == pass && li-k >=0){
+				if(li-k >=0 && dictionary->newWord(window[fwi]) && dictionary->getPass(window[fwi]) == pass){
 					fContext = dictionary->getContext(window[fwi]);
 
 					// Loop over all words within window (except focus word)
 					short wj;
 					for(short j = 0; j < 2*k; ++j){
 						wj = (win_size + fwi + win_idx[j]) % win_size; // word index (in window)
-						if(dictionary->newWord(window[wj]) && (li-k) + win_idx[j] >= 0 && (li-k) + win_idx[j] < words.size()){ // If word has an index vector and window word is within line
+						if((li-k) + win_idx[j] >= 0 && (li-k) + win_idx[j] < words.size() && window[wj] != "" && dictionary->newWord(window[wj])){ // If word has an index vector and window word is within line
 							//cout << window[wj] << endl;
+							dictionary->incrementContextCount(window[wj]);
 							IndexVector iv = dictionary->getIndexVector(window[wj]);
 							fContext->add(iv, j, getWordWeight(window[wj], c));
 						}

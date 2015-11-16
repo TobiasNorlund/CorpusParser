@@ -74,7 +74,7 @@ void Dictionary::initPass(){
 
 void Dictionary::endPass(){
 
-	unsigned int words_in_this_pass = (current_pass < ceil((float)next_index / max_words_per_pass))?max_words_per_pass:next_index % max_words_per_pass;
+	unsigned int words_in_this_pass = (current_pass < ceil((float)next_index / max_words_per_pass))?max_words_per_pass:((next_index-1) % max_words_per_pass)+1;
 
 	// Save contexts
 	auto flags = ios::out | ios::binary;
@@ -85,6 +85,18 @@ void Dictionary::endPass(){
 	if (fc.fail()) throw runtime_error("Error saving contexts. Couldn't write data. ");
 	fc.close();
 
+	// Write word map text file (sorted on occurrence and unsorted)
+	ofstream fmo(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + "-" + to_string(k) + ".map", ofstream::out);
+	vector<pair<string, meta_data >> pairs;
+	for (auto itr = meta_map.begin(); itr != meta_map.end(); ++itr)	pairs.push_back(*itr);
+	sort(pairs.begin(), pairs.end(), [=](pair<string, meta_data> const& a, pair<string, meta_data> const& b)
+		{
+			return a.second.index_index < b.second.index_index;
+		});
+	for(auto it : pairs)
+		fmo << it.first << "\t" << it.second.focus_count << "\t" << it.second.context_count << "\n";
+	fmo.close();
+
 	// If first pass, save index vectors as well
 	if(current_pass == 1){
 
@@ -93,28 +105,16 @@ void Dictionary::endPass(){
 		fi.write((char*)index_vectors, next_index * epsilon * sizeof(unsigned short));
 		fi.close();
 
-		// Write word map text file (sorted on occurance and unsorted)
-		ofstream fmo(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + "-" + to_string(k) + ".map", ofstream::out);
-		vector<pair<string, meta_data >> pairs;
-		for (auto itr = meta_map.begin(); itr != meta_map.end(); ++itr)	pairs.push_back(*itr);
-		sort(pairs.begin(), pairs.end(), [=](pair<string, meta_data> const& a, pair<string, meta_data> const& b)
-			{
-				return a.second.index_index < b.second.index_index;
-			});
-		for(auto it : pairs)
-			fmo << it.first << " ";
-		fmo.close();
-
 		ofstream fmuo(dump_path + "-" + to_string(next_index) + "-" + to_string(d) + "-" + to_string(k) + ".ordered.map", ofstream::out);
 		pairs.clear();
 		for (auto itr = meta_map.begin(); itr != meta_map.end(); ++itr)
 		    pairs.push_back(*itr);
 		sort(pairs.begin(), pairs.end(), [=](pair<string, meta_data> const& a, pair<string, meta_data> const& b)
 			{
-				return a.second.count > b.second.count;
+				return a.second.focus_count > b.second.focus_count;
 			});
 		for(auto it : pairs)
-			fmuo << it.first << "\t" << it.second.count << endl;
+			fmuo << it.first << "\t" << it.second.focus_count << endl;
 		fmuo.close();
 
 	}
@@ -136,11 +136,15 @@ unsigned int Dictionary::getNumWords(){
 }
 
 unsigned int Dictionary::getCount(string word){
-	return meta_map[word].count;
+	return meta_map[word].focus_count;
 }
 
 void Dictionary::incrementCount(string word){
-	++meta_map[word].count;
+	++meta_map[word].focus_count;
+}
+
+void Dictionary::incrementContextCount(string word){
+	++meta_map[word].context_count;
 }
 
 /*
@@ -156,7 +160,8 @@ bool Dictionary::newWord(string word){
 		meta_map[word] = {
 				next_index, // index_index
 				next_index % max_words_per_pass, //context_index
-				0, //count
+				0, // focus_count
+				0, // context_count
 				1+next_index/max_words_per_pass // pass
 		};
 		next_index++;
