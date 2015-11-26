@@ -16,7 +16,8 @@ using namespace std;
 
 namespace model {
 
-OneBCorpus::OneBCorpus(string dir) : dir{dir} {
+OneBCorpus::OneBCorpus(string dir) {
+	this->dir = dir;
 	current_file = 1;
 	initFile(current_file);
 }
